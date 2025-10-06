@@ -11,6 +11,7 @@
   storage = "${config.nps.storageBaseDir}/${name}";
 
   category = "Network & Administration";
+  displayName = "Authelia";
   description = "Authentication & Authorization Server";
 
   yaml = pkgs.formats.yaml {};
@@ -91,7 +92,7 @@ in {
           OIDC client configuration.
           See <https://www.authelia.com/configuration/identity-providers/openid-connect/clients/>
         '';
-        default = [];
+        default = {};
         type = lib.types.attrsOf (
           lib.types.submodule (
             {name, ...}: {
@@ -272,7 +273,7 @@ in {
 
     services.podman.containers = {
       ${name} = {
-        image = "ghcr.io/authelia/authelia:4.39.10";
+        image = "ghcr.io/authelia/authelia:4.39.11";
         environment =
           {
             AUTHELIA_STORAGE_LOCAL_PATH = "/data/db.sqlite3";
@@ -311,6 +312,7 @@ in {
 
         homepage = {
           inherit category;
+          name = displayName;
           settings = {
             inherit description;
             icon = "authelia";
@@ -318,6 +320,7 @@ in {
         };
         glance = {
           inherit category description;
+          name = displayName;
           id = name;
           icon = "di:authelia";
         };

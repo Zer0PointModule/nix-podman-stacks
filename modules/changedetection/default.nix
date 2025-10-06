@@ -8,6 +8,7 @@
   cfg = config.nps.stacks.${name};
 
   category = "General";
+  displayName = "Changedetection";
   description = "Website Change Detection";
 in {
   imports = import ../mkAliases.nix config lib name [name "sockpuppetbrowser"];
@@ -17,7 +18,7 @@ in {
   config = lib.mkIf cfg.enable {
     services.podman.containers = {
       ${name} = {
-        image = "ghcr.io/dgtlmoon/changedetection.io:0.50.14";
+        image = "ghcr.io/dgtlmoon/changedetection.io:0.50.16";
         volumes = [
           "${storage}:/datastore"
         ];
@@ -32,6 +33,7 @@ in {
         traefik.name = name;
         homepage = {
           inherit category;
+          name = displayName;
           settings = {
             inherit description;
             icon = "changedetection";
@@ -40,6 +42,7 @@ in {
         };
         glance = {
           inherit category description;
+          name = displayName;
           id = name;
           icon = "di:changedetection";
         };

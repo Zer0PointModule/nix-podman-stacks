@@ -8,6 +8,7 @@
   cfg = config.nps.stacks.${name};
 
   category = "Network & Administration";
+  displayName = "Adguard";
   description = "Adblocker";
 in {
   imports = import ../mkAliases.nix config lib name [name];
@@ -16,7 +17,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     services.podman.containers.${name} = {
-      image = "docker.io/adguard/adguardhome:v0.107.66";
+      image = "docker.io/adguard/adguardhome:v0.107.67";
       volumes = [
         "${storage}/work:/opt/adguardhome/work"
         "${storage}/conf:/opt/adguardhome/conf"
@@ -32,6 +33,7 @@ in {
       traefik.name = name;
       homepage = {
         inherit category;
+        name = displayName;
         settings = {
           inherit description;
           icon = "adguard-home";
@@ -40,6 +42,7 @@ in {
       };
       glance = {
         inherit category description;
+        name = displayName;
         id = name;
         icon = "di:adguard-home";
       };

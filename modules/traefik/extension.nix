@@ -1,8 +1,10 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }: let
+  utils = pkgs.callPackage ../utils.nix {inherit config;};
   stackCfg = config.nps.stacks.traefik;
 
   ip4Address = config.nps.hostIP4Address;
@@ -77,7 +79,15 @@ in {
               };
               serviceAddressInternal = mkOption {
                 type = lib.types.str;
-                default = "${name}:${getPort port 1}";
+                default = let
+                  p = getPort port 1;
+                in
+                  "${name}"
+                  + (
+                    if (p != null)
+                    then ":${p}"
+                    else ""
+                  );
                 defaultText = lib.literalExpression ''"''${containerName}''${containerCfg.port}"'';
                 description = ''
                   The internal main address of the service. Can be used for internal communication
@@ -179,7 +189,7 @@ in {
             labels = lib.optionalAttrs enableTraefik (
               {
                 "traefik.enable" = "true";
-                "traefik.http.routers.${name}.rule" = ''Host(\`${traefikCfg.serviceHost}\`)'';
+                "traefik.http.routers.${name}.rule" = utils.escapeOnDemand ''Host(`${traefikCfg.serviceHost}`)'';
                 # "traefik.http.routers.${name}.entrypoints" = "websecure,websecure-internal";
                 "traefik.http.routers.${name}.service" = lib.mkDefault name;
               }

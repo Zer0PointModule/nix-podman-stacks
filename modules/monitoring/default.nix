@@ -508,7 +508,7 @@ in {
         configDst = "/etc/alloy/config.alloy";
       in
         lib.mkIf cfg.alloy.enable {
-          image = "docker.io/grafana/alloy:v1.10.2";
+          image = "docker.io/grafana/alloy:v1.11.0";
           volumes = [
             "${cfg.alloy.config}:${configDst}"
           ];
@@ -570,7 +570,7 @@ in {
         };
 
       ${podmanExporterName} = lib.mkIf cfg.podmanExporter.enable {
-        image = "quay.io/navidys/prometheus-podman-exporter:v1.18.1";
+        image = "quay.io/navidys/prometheus-podman-exporter:v1.19.0";
         environment.CONTAINER_HOST =
           if cfg.${podmanExporterName}.useSocketProxy
           then config.nps.stacks.docker-socket-proxy.address
@@ -627,7 +627,7 @@ in {
       };
 
       ${alertmanagerNtfyName} = lib.mkIf (cfg.alertmanager.enable && cfg.alertmanager.ntfy.enable) {
-        image = "ghcr.io/alexbakker/alertmanager-ntfy:1.0.1";
+        image = "ghcr.io/alexbakker/alertmanager-ntfy:1.0.2";
         volumes = ["${cfg.alertmanager.ntfy.settings}:/etc/config.yml"];
         templateMount = lib.optional (cfg.alertmanager.ntfy.tokenFile != null) {
           templatePath = yaml.generate "auth.yaml" {ntfy.auth.token = "{{file.Read `${cfg.alertmanager.ntfy.tokenFile}`}}";};

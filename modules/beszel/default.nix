@@ -15,6 +15,7 @@
   socketTargetLocation = "/var/run/podman.sock";
 
   category = "Monitoring";
+  displayName = "Beszel";
   description = "Lightweight Monitoring Platform";
 in {
   imports =
@@ -135,7 +136,7 @@ in {
 
     services.podman.containers = {
       ${name} = {
-        image = "ghcr.io/henrygd/beszel/beszel:0.12.12";
+        image = "ghcr.io/henrygd/beszel/beszel:0.13.1";
         volumes =
           [
             "${storage}/data:/beszel_data"
@@ -159,6 +160,7 @@ in {
         traefik.name = name;
         homepage = {
           inherit category;
+          name = displayName;
           settings = {
             inherit description;
             icon = "beszel";
@@ -166,13 +168,14 @@ in {
         };
         glance = {
           inherit category description;
+          name = displayName;
           id = name;
           icon = "di:beszel";
         };
       };
 
       ${agentName} = {
-        image = "ghcr.io/henrygd/beszel/beszel-agent:0.12.12";
+        image = "ghcr.io/henrygd/beszel/beszel-agent:0.13.1";
         volumes = [
           "${storage}/beszel_socket:/beszel_socket"
         ];

@@ -7,6 +7,7 @@
   cfg = config.nps.stacks.${name};
 
   category = "Monitoring";
+  displayName = "Dozzle";
   description = "Container Log Viewer";
 in {
   imports =
@@ -28,7 +29,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     services.podman.containers.${name} = {
-      image = "docker.io/amir20/dozzle:v8.14.2";
+      image = "docker.io/amir20/dozzle:v8.14.4";
       environment = {
         DOZZLE_REMOTE_HOST = lib.mkIf (cfg.useSocketProxy) config.nps.stacks.docker-socket-proxy.address;
       };
@@ -37,6 +38,7 @@ in {
       traefik.name = name;
       homepage = {
         inherit category;
+        name = displayName;
         settings = {
           inherit description;
           icon = "dozzle";
@@ -44,6 +46,7 @@ in {
       };
       glance = {
         inherit category description;
+        name = displayName;
         id = name;
         icon = "di:dozzle";
       };

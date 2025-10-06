@@ -10,6 +10,7 @@
   yaml = pkgs.formats.yaml {};
 
   category = "General";
+  displayName = "Donetick";
   description = "Task Organizer";
 in {
   imports = import ../mkAliases.nix config lib name [name];
@@ -176,7 +177,7 @@ in {
 
     services.podman.containers = {
       ${name} = {
-        image = "docker.io/donetick/donetick:v0.1.62";
+        image = "docker.io/donetick/donetick:v0.1.64";
         volumes = [
           "${storage}/db:/donetick-data/"
           "${yaml.generate "selfhosted.yaml" cfg.settings}:/config/selfhosted.yaml"
@@ -198,6 +199,7 @@ in {
         traefik.name = name;
         homepage = {
           inherit category;
+          name = displayName;
           settings = {
             inherit description;
             icon = "donetick";
@@ -205,6 +207,7 @@ in {
         };
         glance = {
           inherit category description;
+          name = displayName;
           id = name;
           icon = "di:donetick";
         };
