@@ -2,9 +2,9 @@
   description = "Collection of opinionated rootless Podman stacks";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
@@ -44,7 +44,7 @@
         sops-nix.homeManagerModules.sops
         self.homeModules.nps
         {
-          home.stateVersion = "25.05";
+          home.stateVersion = "25.11";
           home.username = "ci";
           home.homeDirectory = "/home/ci";
         }
