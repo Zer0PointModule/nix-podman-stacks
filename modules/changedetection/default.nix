@@ -4,6 +4,7 @@
   ...
 }: let
   name = "changedetection";
+  browserName = "${name}-browser";
   storage = "${config.nps.storageBaseDir}/${name}";
   cfg = config.nps.stacks.${name};
 
@@ -11,7 +12,7 @@
   displayName = "Changedetection";
   description = "Website Change Detection";
 in {
-  imports = import ../mkAliases.nix config lib name [name "sockpuppetbrowser"];
+  imports = import ../mkAliases.nix config lib name [name browserName];
 
   options.nps.stacks.${name}.enable = lib.mkEnableOption name;
 
@@ -23,7 +24,7 @@ in {
           "${storage}:/datastore"
         ];
         environment = {
-          PLAYWRIGHT_DRIVER_URL = "ws://sockpuppetbrowser:3000";
+          PLAYWRIGHT_DRIVER_URL = "ws://${browserName}:3000";
         };
 
         extraPodmanArgs = ["--memory=1g"];
@@ -48,7 +49,7 @@ in {
         };
       };
 
-      sockpuppetbrowser = {
+      ${browserName} = {
         image = "docker.io/dgtlmoon/sockpuppetbrowser:latest";
         environment = {
           SCREEN_WIDTH = 1920;
