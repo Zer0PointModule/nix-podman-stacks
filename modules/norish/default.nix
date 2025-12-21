@@ -47,8 +47,7 @@ in {
 
           For details, see:
 
-          - <https://www.authelia.com/integration/openid-connect/clients/karakeep/>
-          - <https://docs.karakeep.app/configuration/#authentication--signup>
+          - <https://github.com/norish-recipes/norish?tab=readme-ov-file#first-time-auth-provider>
         '';
       };
       clientSecretFile = lib.mkOption {
@@ -85,7 +84,6 @@ in {
         client_secret = cfg.oidc.clientSecretHash;
         public = false;
         authorization_policy = name;
-        #claims_policy = name;
         require_pkce = true;
         pkce_challenge_method = "S256";
         pre_configured_consent_duration = config.nps.stacks.authelia.oidc.defaultConsentDuration;
@@ -95,17 +93,7 @@ in {
         token_endpoint_auth_method = "client_secret_post";
       };
 
-      # See <https://www.authelia.com/integration/openid-connect/openid-connect-1.0-claims/#restore-functionality-prior-to-claims-parameter>
-      settings.identity_providers.oidc.claims_policies.${name}.id_token = [
-        "email"
-        "email_verified"
-        "alt_emails"
-        "preferred_username"
-        "name"
-      ];
-
       # Norish doesn't have any Group/Claim based RBAC yet, so we have to do in on Authelia level
-      # See <https://github.com/karakeep-app/karakeep/issues/1525>
       settings.identity_providers.oidc.authorization_policies.${name} = {
         default_policy = "deny";
         rules = [
