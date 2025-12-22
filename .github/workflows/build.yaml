@@ -8,6 +8,7 @@ on:
       - ".github/workflows/ci.yaml"
       - "images/**"
       - "**.md"
+      - "docs/**"
     pull_request:
       branches:
         - main
