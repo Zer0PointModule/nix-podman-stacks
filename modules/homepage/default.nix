@@ -208,7 +208,7 @@ in {
       port = 3000;
       traefik = {
         inherit name;
-        subDomain = "";
+        subDomain = lib.mkDefault "";
       };
 
       glance = {

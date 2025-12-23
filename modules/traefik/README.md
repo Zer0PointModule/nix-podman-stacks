@@ -8,11 +8,10 @@
     enable = true;
 
     domain = "example.com";
-    # Token necessary to fetch Letsencrypt wildcard certificates automatically (DNS challenge)
-    extraEnv.CF_DNS_API_TOKEN.fromFile = config.sops.secrets."traefik/cf_api_token".path;
-
-    # For exposed services, we can limit access to certain countries using a geoblock middleware
-    geoblock.allowedCountries = ["DE"];
+    # Token will be used to fetch Letsencrypt wildcard certificates automatically (DNS challenge)
+    extraEnv = {
+      CF_DNS_API_TOKEN.fromFile = config.sops.secrets."traefik/cf_api_token".path;
+    };
   };
 }
 ```
