@@ -10,7 +10,7 @@
       clientSecretFile = config.sops.secrets."immich/authelia/client_secret".path;
       clientSecretHash = "$pbkdf2-sha512$...";
     };
-    dbPasswordFile = config.sops.secrets."immich/db_password".path;
+    db.passwordFile = config.sops.secrets."immich/db_password".path;
 
     settings = {
       oauth.autoLaunch = true;

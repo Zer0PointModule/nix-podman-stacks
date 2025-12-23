@@ -33,12 +33,14 @@
 
   json = pkgs.formats.json {};
 in {
-  imports = import ../mkAliases.nix config lib name [
-    name
-    redisName
-    dbName
-    mlName
-  ];
+  imports =
+    import ../mkAliases.nix config lib name [
+      name
+      redisName
+      dbName
+      mlName
+    ]
+    ++ [(lib.mkRenamedOptionModule ["nps" "stacks" "immich" "dbPasswordFile"] ["nps" "stacks" "immich" "db" "passwordFile"])];
 
   options.nps.stacks.${name} = {
     enable = lib.mkEnableOption name;
@@ -101,11 +103,11 @@ in {
         description = "Users of this group will be able to log in to Immich";
       };
     };
-    dbPasswordFile = lib.mkOption {
-      type = lib.types.path;
-      description = ''
-        Path to the file containing the PostgreSQL password for the Immich database.
-      '';
+    db = {
+      passwordFile = lib.mkOption {
+        type = lib.types.path;
+        description = "Path to the file containing the database password";
+      };
     };
   };
 
@@ -229,7 +231,7 @@ in {
         };
 
         environment = env;
-        extraEnv.DB_PASSWORD.fromFile = cfg.dbPasswordFile;
+        extraEnv.DB_PASSWORD.fromFile = cfg.db.passwordFile;
         devices = ["/dev/dri:/dev/dri"];
 
         dependsOnContainer = [
@@ -276,7 +278,7 @@ in {
         extraEnv = {
           POSTGRES_USER = env.DB_USERNAME;
           POSTGRES_DB = env.DB_DATABASE_NAME;
-          POSTGRES_PASSWORD.fromFile = cfg.dbPasswordFile;
+          POSTGRES_PASSWORD.fromFile = cfg.db.passwordFile;
         };
 
         stack = name;

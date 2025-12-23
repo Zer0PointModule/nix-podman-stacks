@@ -314,7 +314,7 @@ in {
 
       guacamole = {
         enable = true;
-        userMappingXml = pkgs.writeText "user-mapping.xml" ''
+        userMappingXml = ''
           <user-mapping>
             <authorize username="${dummyUser}" password="${dummySecret}">
                 <connection name="SSH">
@@ -379,7 +379,7 @@ in {
           clientSecretFile = dummySecretFile;
           clientSecretHash = dummyHash;
         };
-        dbPasswordFile = dummySecretFile;
+        db.passwordFile = dummySecretFile;
       };
 
       it-tools.enable = true;
