@@ -19,7 +19,7 @@ in {
     services.podman.containers = {
       ${name} = {
         image = "docker.io/jhaals/yopass:12.5.0";
-        exec = "--memcached=memcached:11211 --port 8080";
+        exec = "--memcached=${dbName}:11211 --port 8080";
 
         wantsContainer = [dbName];
         stack = name;
