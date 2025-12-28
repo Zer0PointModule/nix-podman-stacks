@@ -86,8 +86,6 @@ in {
         ];
       };
 
-      # No real RBAC control based on custom claims / groups yet. Restrict user-access on Authelia level for now
-      # See <https://github.com/TwiN/gatus/issues/638>
       settings.identity_providers.oidc.authorization_policies.${name} = {
         default_policy = "deny";
         rules = [
