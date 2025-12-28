@@ -11,6 +11,93 @@ In order to disable the Streaming stack, set the `enable` option to `false` or r
 }
 ```
 
+## Override & extend Defaults
+
+The `nps` modules are built on top of Home Managers builtin [`services.podman.containers`](https://home-manager-options.extranix.com/?query=services.podman.containers&release=release-25.11) options.
+When enabling a stack, under the hood, one or multiple `services.podman.containers` definitions will be created, including the setup of necessary environment variables, volumes, labels etc.
+
+In some cases it can be helpful to either extend or override the settings that a module is preconfigured with.
+The options can be set directly on `services.podman.container` level, or through the stack aliases provided with this project.
+For example, the following two configurations are equivalent:
+
+```nix
+{
+  nps.stacks = {
+      streaming.containers.jellyfin.volumes = ["/mnt/hdd2/media:/media/extra-lib"];
+  };
+}
+```
+
+```nix
+{
+  services.podman.containers.jellyfin.volumes = ["/mnt/hdd2/media:/media/extra-lib"];
+}
+```
+
+### Extending Presets
+
+Mergable option types like attribute sets (e.g. used for environment variables) or lists (e.g. used for volumes) can be extended.
+In the above example, the new Jellyfin volume would be appended to the list of preconfigured volumes that a module defines.
+
+The same works with attribute sets. To add new environment variables to the Paperless container:
+
+```nix
+{
+  nps.stacks.paperless = {
+    containers.paperless.environment = {
+      PAPERLESS_CONSUMER_RECURSIVE = true;
+      PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS = true;
+    };
+  };
+}
+```
+
+This would append the two new environment variables to the existing configuration.
+
+### Override Presets
+
+While mergable option type definitions with the same priority will be merged, it's also possible to override a definition.
+For example, instead of appending to the existing list of volumes, we can override all volumes entirely.
+
+Modifying the initial example:
+
+```nix
+{lib, ...}: {
+  nps.stacks = {
+      streaming.containers.jellyfin.volumes = lib.mkForce ["/mnt/hdd2/media:/media/extra-lib"];
+  };
+}
+```
+
+The `lib.mkForce` will apply this option with a higher prioority. It won't be merged with the existing definition but will override it entirely. In this case, the Jellyfin container would only have a single volume entry.
+
+The same goes for the Paperless example:
+
+```nix
+{lib, ...}: {
+  nps.stacks.paperless = {
+    containers.paperless.environment = lib.mkForce {
+      PAPERLESS_CONSUMER_RECURSIVE = true;
+      PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS = true;
+    };
+  };
+}
+```
+
+This would override all environment variables of the Paperless container. The final container would only have two environment variables defined.
+
+In case of conflicting definitions, instead of overriding all attributes of an attribute set, you can also apply it to individual items:
+
+```nix
+{lib, ...}: {
+  nps.stacks.paperless = {
+    containers.paperless.environment = {
+      PAPERLESS_FILENAME_FORMAT = lib.mkForce "{{created_year}}/{{created_month}}/{{correspondent}}/{{title}}";
+    };
+  };
+}
+```
+
 ## Authelia
 
 ### Forward Auth
@@ -100,7 +187,7 @@ The above is equivalent to adding the service to Gatus via its settings option:
 }
 ```
 
-## Override Defaults
+### Override Defaults
 
 To override the default settings of a container when enabling Gatus (e.g. the url),
 the `settings` attribute can be used, which is directly mapped to an endpointentry in the in Gatus configuration.
