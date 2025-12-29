@@ -42,6 +42,10 @@ in {
       type = lib.types.int;
       default = 0;
       description = ''
+        > [!WARNING]
+        > Do not change this value unless you know what you are doing!
+        > You might run into permisssion issues if volumes cannot be accessed by the mapped subuid.
+
         UID of the user that will be used by default for containers if they allow UID configuration.
         When running rootless containers, UID 0 gets mapped to the host users UID.
       '';
@@ -50,6 +54,10 @@ in {
       type = lib.types.int;
       default = 0;
       description = ''
+        > [!WARNING]
+        > Do not change this value unless you know what you are doing!
+        > You might run into permisssion issues if volumes cannot be accessed by the mapped subgid.
+
         GID of the user that will be used by default for containers if they allow GID configuration.
         When running rootless containers, GID 0 gets mapped to the host users GID.
       '';
