@@ -75,7 +75,7 @@ in {
       };
 
       settings.identity_providers.oidc.cors = {
-        allowed_origins = "*";
+        allowed_origins_from_client_redirect_uris = true;
         endpoints = [
           "authorization"
           "pushed-authorization-request"
