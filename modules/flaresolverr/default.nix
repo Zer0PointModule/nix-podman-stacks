@@ -25,6 +25,7 @@ in {
         CAPTCHA_SOLVER = "none";
       };
 
+      port = 8191;
       homepage = {
         inherit category;
         name = displayName;
