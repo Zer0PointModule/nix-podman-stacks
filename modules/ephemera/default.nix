@@ -80,7 +80,7 @@ in {
           LG_BASE_URL = lib.mkDefault "https://libgen.bz";
         }
         // lib.optionalAttrs cfg.flaresolverr.enable {
-          FLARESOLVERR_URL = config.services.podman.containers.flaresolverr.traefik.serviceAddressInternal;
+          FLARESOLVERR_URL = "http://${config.nps.containers.flaresolverr.traefik.serviceAddressInternal}";
         }
         // cfg.extraEnv;
 
