@@ -67,21 +67,8 @@ in {
           - <https://docs.getoutline.com/s/hosting/doc/oidc-8CPBm6uC0I>
         '';
       };
-      clientSecretFile = lib.mkOption {
-        type = lib.types.str;
-        description = ''
-          The file containing the client secret for the OIDC client that will be registered in Authelia.
-        '';
-      };
-      clientSecretHash = lib.mkOption {
-        type = lib.types.str;
-        description = ''
-          The hashed client_secret. Will be set in the Authelia client config.
-          For examples on how to generate a client secret, see
-
-          <https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#client-secret>
-        '';
-      };
+      clientSecretFile = (import ../authelia/options.nix lib).clientSecretFile;
+      clientSecretHash = (import ../authelia/options.nix lib).derivableClientSecretHash cfg.oidc.clientSecretFile;
       userGroup = lib.mkOption {
         type = lib.types.str;
         default = "${name}_user";

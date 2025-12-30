@@ -29,11 +29,27 @@
   container = cfg.containers.${name};
   lldap = config.nps.stacks.lldap;
 
-  mkClientSecretFileDest = clientName: "/secrets/oidc/clients/${clientName}";
-  isAbsolutePath = p: builtins.substring 0 1 (toString p) == "/";
+  mkClientSecretEnvName = clientName: "OIDC_CLIENT_SECRET_HASH_${lib.toUpper clientName}";
+
+  fromFileClientSecrets =
+    cfg.oidc.clients
+    |> lib.filterAttrs (k: v: v.client_secret != null && lib.isAttrs v.client_secret && v.client_secret.fromFile != null)
+    |> lib.mapAttrs' (k: v:
+      lib.nameValuePair (mkClientSecretEnvName k) {
+        fromFile = v.client_secret.fromFile;
+      });
+
+  toHashClientSecrets =
+    cfg.oidc.clients
+    |> lib.filterAttrs (k: v: v.client_secret != null && lib.isAttrs v.client_secret && v.client_secret.toHash != null)
+    |> lib.mapAttrs' (k: v:
+      lib.nameValuePair (mkClientSecretEnvName k) {
+        fromCommand = ''${lib.getExe pkgs.authelia} crypto hash generate pbkdf2 --no-confirm --password "$(<${v.client_secret.toHash})" | sed 's/^digest:[[:space:]]*//I' '';
+      });
+
   mappedOidcClients = lib.mapAttrs (k: v:
-    if v.client_secret != null && isAbsolutePath v.client_secret
-    then v // {client_secret = "{{ fileContent `${mkClientSecretFileDest k}` }}";}
+    if v.client_secret != null && lib.isAttrs v.client_secret
+    then v // {client_secret = "{{ env `${mkClientSecretEnvName k}` }}";}
     else v)
   cfg.oidc.clients;
 in {
@@ -111,10 +127,10 @@ in {
                   default = name;
                 };
                 client_secret = lib.mkOption {
-                  type = lib.types.nullOr lib.types.str;
+                  type = (import ./options.nix lib).nullableClientSecretType;
                   default = null;
                   description = ''
-                    The client secret. If passed an absolute path, the secret will be read from the file at that path.
+                    The client secret.
                   '';
                 };
               };
@@ -298,6 +314,8 @@ in {
             X_AUTHELIA_CONFIG = "/config/configuration.yml,/config/jwks_key_config.yml";
           };
 
+        extraEnv = fromFileClientSecrets // toHashClientSecrets;
+
         fileEnvMount =
           {
             AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE = cfg.jwtSecretFile;
@@ -318,12 +336,7 @@ in {
           ++ lib.optionals oidcEnabled [
             "${cfg.oidc.jwksRsaKeyFile}:/secrets/oidc/jwks/rsa.key"
             "${writeOidcJwksConfigFile "/secrets/oidc/jwks/rsa.key"}:/config/jwks_key_config.yml"
-          ]
-          ++ (cfg.oidc.clients
-            |> lib.filterAttrs (k: v: v.client_secret != null && isAbsolutePath v.client_secret)
-            |> lib.mapAttrsToList (
-              clientName: v: "${v.client_secret}:${mkClientSecretFileDest clientName}"
-            ));
+          ];
 
         wantsContainer = lib.optional (cfg.sessionProvider == "redis") redisName;
         stack = name;

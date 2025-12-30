@@ -30,21 +30,8 @@ in {
           - <https://github.com/fccview/jotty/blob/main/howto/SSO.md>
         '';
       };
-      clientSecretFile = lib.mkOption {
-        type = lib.types.str;
-        description = ''
-          The file containing the client secret for the Gatus OIDC client that will be registered in Authelia.
-        '';
-      };
-      clientSecretHash = lib.mkOption {
-        type = lib.types.str;
-        description = ''
-          The hashed client_secret.
-          For examples on how to generate a client secret, see
-
-          <https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#client-secret>
-        '';
-      };
+      clientSecretFile = (import ../authelia/options.nix lib).clientSecretFile;
+      clientSecretHash = (import ../authelia/options.nix lib).derivableClientSecretHash cfg.oidc.clientSecretFile;
       adminGroup = lib.mkOption {
         type = lib.types.str;
         default = "${name}_admin";

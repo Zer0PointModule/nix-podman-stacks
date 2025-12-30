@@ -31,15 +31,7 @@ in {
           - <https://www.audiobookshelf.org/guides/oidc_authentication/#configuring-audiobookshelf-for-sso>
         '';
       };
-      clientSecretHash = lib.mkOption {
-        type = lib.types.str;
-        description = ''
-          The hashed client_secret.
-          For examples on how to generate a client secret, see
-
-          <https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#client-secret>
-        '';
-      };
+      clientSecretHash = (import ../authelia/options.nix lib).clientSecretHash;
       adminGroup = lib.mkOption {
         type = lib.types.str;
         default = "${name}_admin";

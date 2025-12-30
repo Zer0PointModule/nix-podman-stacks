@@ -89,15 +89,7 @@ in {
           - <https://beszel.dev/guide/oauth>
         '';
       };
-      clientSecretHash = lib.mkOption {
-        type = lib.types.str;
-        description = ''
-          The hashed client_secret.
-          For examples on how to generate a client secret, see
-
-          <https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#client-secret>
-        '';
-      };
+      clientSecretHash = (import ../authelia/options.nix lib).clientSecretHash;
       userGroup = lib.mkOption {
         type = lib.types.str;
         default = "${name}_user";

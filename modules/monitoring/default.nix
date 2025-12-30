@@ -137,21 +137,8 @@ in {
             - <https://docs.mealie.io/documentation/getting-started/installation/backend-config/#openid-connect-oidc>
           '';
         };
-        clientSecretFile = lib.mkOption {
-          type = lib.types.str;
-          description = ''
-            The file containing the client secret for the OIDC client that will be registered in Authelia.
-          '';
-        };
-        clientSecretHash = lib.mkOption {
-          type = lib.types.str;
-          description = ''
-            The hashed client_secret. Will be set in the Authelia client config.
-            For examples on how to generate a client secret, see
-
-            <https://www.authelia.com/integration/openid-connect/frequently-asked-questions/#client-secret>
-          '';
-        };
+        clientSecretFile = (import ../authelia/options.nix lib).clientSecretFile;
+        clientSecretHash = (import ../authelia/options.nix lib).derivableClientSecretHash cfg.grafana.oidc.clientSecretFile;
         adminGroup = lib.mkOption {
           type = lib.types.str;
           default = "${grafanaName}_admin";
