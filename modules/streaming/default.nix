@@ -278,7 +278,7 @@ in {
 
       ${qbittorrentName} = lib.mkIf cfg.qbittorrent.enable {
         image = "docker.io/linuxserver/qbittorrent:5.1.4";
-        dependsOnContainer = [gluetunName];
+
         network = lib.mkIf cfg.gluetun.enable (lib.mkForce ["container:${gluetunName}"]);
         volumes = [
           "${storage}/${qbittorrentName}:/config"
@@ -293,6 +293,7 @@ in {
         };
 
         extraEnv = cfg.qbittorrent.extraEnv;
+        dependsOnContainer = lib.mkIf cfg.gluetun.enable [gluetunName];
 
         stack = stackName;
         port = 8080;
