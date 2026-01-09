@@ -688,6 +688,7 @@ in {
               clientSecretHash = dummyHash;
             };
           };
+          seerr.enable = true;
         }
         // lib.genAttrs ["sonarr" "radarr" "bazarr" "prowlarr"] (name: {
           extraEnv."${lib.toUpper name}__AUTH__APIKEY".fromFile = dummySecretFile;

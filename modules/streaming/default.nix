@@ -15,6 +15,7 @@
   radarrName = "radarr";
   bazarrName = "bazarr";
   prowlarrName = "prowlarr";
+  seerrName = "Seerr";
 
   category = "Media & Downloads";
   qbittorrentDescription = "BitTorrent Client";
@@ -29,6 +30,9 @@
   bazarrDisplayName = "Bazarr";
   prolarrDescription = "Indexer Management";
   prowlarrDisplayName = "Prowlarr";
+
+  seerrDescription = "Media Requests";
+  seerrDisplayName = "Seerr";
 
   gluetunCategory = "Network & Administration";
   gluetunDescription = "VPN client";
@@ -162,6 +166,7 @@ in {
           };
         };
       };
+      seerr.enable = lib.mkEnableOption "Seerr";
       flaresolverr.enable =
         lib.mkEnableOption "Flaresolverr"
         // {
@@ -386,6 +391,34 @@ in {
             icon = "di:jellyfin";
           };
         };
+
+      ${seerrName} = lib.mkIf cfg.seerr.enable {
+        image = "ghcr.io/seerr-team/seerr:develop";
+        user = "${toString config.nps.defaultUid}:${toString config.nps.defaultGid}";
+        volumes = [
+          "${storage}/${seerrName}/config:/app/config"
+        ];
+        environment.PORT = 5055;
+
+        port = 5055;
+        traefik.name = seerrName;
+        stack = stackName;
+        homepage = {
+          inherit category;
+          name = seerrDisplayName;
+          settings = {
+            description = seerrDescription;
+            icon = "jellyseerr";
+          };
+        };
+        glance = {
+          inherit category;
+          description = seerrDescription;
+          name = seerrDisplayName;
+          id = seerrName;
+          icon = "di:jellyseerr";
+        };
+      };
 
       ${sonarrName} = lib.mkIf cfg.sonarr.enable {
         image = "lscr.io/linuxserver/sonarr:4.0.16";
