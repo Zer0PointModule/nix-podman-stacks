@@ -152,8 +152,7 @@ in {
           '';
         };
         bouncerKeyFile = lib.mkOption {
-          type = lib.types.nullOr lib.types.path;
-          default = null;
+          type = lib.types.path;
           description = ''
             Path to the file containing the key for the Traefik bouncer.
             If this is set, a Bouncer will be setup in CrowdSec. Also a new `crowdsec` middleware will be registered in Traefik and added to the `public` chain.

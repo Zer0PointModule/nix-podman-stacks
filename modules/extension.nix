@@ -458,21 +458,42 @@ in {
 
   config = {
     assertions = [
-      {
-        message = "When using `extraEnv` with `fromFile`, `fromTemplate` or `fromCommand`, exactly one of them must be set.";
-        # For every container check all extraEnv attributes that are attrs.
-        # If yes check that only one of 'fromFile', 'fromTemplate' or 'fromCommand' is set.
-        assertion =
-          config.services.podman.containers
-          |> lib.attrValues
-          |> lib.all (
-            c:
-              c.extraEnv
-              |> lib.attrValues
-              |> lib.all (v: (!lib.isAttrs v) || (builtins.length (builtins.filter (x: x != null) [v.fromFile v.fromTemplate v.fromCommand]) == 1))
-          );
-      }
+      (
+        let
+          baseMessage = "When using `extraEnv` with `fromFile`, `fromTemplate` or `fromCommand`, exactly one of them must be set.";
+
+          failures =
+            lib.concatMap
+            (
+              containerName: let
+                c = config.services.podman.containers.${containerName};
+              in
+                lib.concatMap
+                (
+                  envName: let
+                    v = c.extraEnv.${envName};
+                    count =
+                      builtins.length
+                      (builtins.filter (x: x != null)
+                        [v.fromFile v.fromTemplate v.fromCommand]);
+                  in
+                    lib.optional
+                    (lib.isAttrs v && count != 1)
+                    "container=${containerName}, extraEnv=${envName}, set=${toString count}"
+                )
+                (builtins.attrNames c.extraEnv)
+            )
+            (builtins.attrNames config.services.podman.containers);
+        in {
+          assertion = failures == [];
+          message =
+            baseMessage
+            + "\n\nThe following entries are invalid:\n"
+            + lib.concatStringsSep "\n" failures;
+        }
+      )
     ];
+
     # For every stack, define a default network.
     services.podman.networks = let
       stacks =
