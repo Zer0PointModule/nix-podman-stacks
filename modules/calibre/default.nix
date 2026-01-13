@@ -10,11 +10,8 @@
   category = "Media & Downloads";
   description = "Ebook Library";
   displayName = "Calibre-Web-Automated";
-
-  downloaderDisplayName = "CWA Book Downloader";
-  downloaderDescription = "Book Downloader for Calibre Web";
 in {
-  imports = import ../mkAliases.nix config lib name [name "${name}-downloader"];
+  imports = import ../mkAliases.nix config lib name [name];
 
   options.nps.stacks.${name}.enable = lib.mkEnableOption name;
 
@@ -48,44 +45,6 @@ in {
         name = displayName;
         id = name;
         icon = "di:calibre-web";
-      };
-    };
-
-    services.podman.containers."${name}-downloader" = let
-      ingestDir = "/cwa-book-ingest";
-      port = 8084;
-    in {
-      image = "ghcr.io/calibrain/calibre-web-automated-book-downloader:20250815";
-      environment = {
-        FLASK_PORT = port;
-        FLASK_DEBUG = false;
-        INGEST_DIR = ingestDir;
-        APP_ENV = "prod";
-        BOOK_LANGUAGE = "en,de";
-        UID = config.nps.defaultUid;
-        GID = config.nps.defaultGid;
-      };
-      volumes = [
-        "${storage}/ingest:${ingestDir}"
-      ];
-
-      port = port;
-      stack = name;
-      traefik.name = "calibre-downloader";
-      homepage = {
-        inherit category;
-        name = downloaderDisplayName;
-        settings = {
-          description = downloaderDescription;
-          icon = "sh-cwa-book-downloader";
-        };
-      };
-      glance = {
-        inherit category;
-        id = name;
-        name = downloaderDisplayName;
-        description = downloaderDescription;
-        icon = "di:sh-cwa-book-downloader";
       };
     };
   };
