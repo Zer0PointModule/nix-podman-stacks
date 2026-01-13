@@ -631,6 +631,11 @@ in {
         };
       };
 
+      shelfmark = {
+        enable = true;
+        downloadDirectory = "${config.nps.storageBaseDir}/booklore/bookdrop";
+      };
+
       sshwifty = {
         enable = true;
         settings = {
