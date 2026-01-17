@@ -223,9 +223,6 @@ in {
       forgejo = {
         enable = true;
         settings = {
-          DEFAULT = {
-            RUN_MODE = "dev";
-          };
           other = {
             SHOW_FOOTER_VERSION = false;
           };

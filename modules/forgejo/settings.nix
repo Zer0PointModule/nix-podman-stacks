@@ -23,7 +23,7 @@ in {
 
   server = {
     APP_DATA_PATH = "/data/gitea";
-    DOMAIN = "forgejo.testing.ntasler.de";
+    DOMAIN = cfg.containers.forgejo.traefik.serviceHost;
     SSH_DOMAIN = cfg.containers.forgejo.traefik.serviceHost;
     HTTP_PORT = 3000;
     ROOT_URL = cfg.containers.forgejo.traefik.serviceUrl;
@@ -37,13 +37,6 @@ in {
   database = {
     PATH = "/data/gitea/gitea.db";
     DB_TYPE = "sqlite3";
-    HOST = "localhost:3306";
-    NAME = "gitea";
-    USER = "root";
-    PASSWD = "";
-    LOG_SQL = false;
-    SCHEMA = "";
-    SSL_MODE = "disable";
   };
 
   indexer = {
