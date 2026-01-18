@@ -34,11 +34,6 @@ in {
     OFFLINE_MODE = true;
   };
 
-  database = {
-    PATH = "/data/gitea/gitea.db";
-    DB_TYPE = "sqlite3";
-  };
-
   indexer = {
     ISSUE_INDEXER_PATH = "/data/gitea/indexers/issues.bleve";
   };

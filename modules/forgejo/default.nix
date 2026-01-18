@@ -5,6 +5,8 @@
   ...
 }: let
   name = "forgejo";
+  dbName = "${name}-db";
+
   storage = "${config.nps.storageBaseDir}/${name}";
   cfg = config.nps.stacks.${name};
 
@@ -90,9 +92,38 @@ in {
         then ini.generate "app.ini" settings
         else null;
       description = ''
-        Optional app settings for Forgejo.
+        Additional app settings for Forgejo.
         For a full list of options, refer to the [Forgejo documentation](https://forgejo.org/docs/latest/admin/config-cheat-sheet/).
       '';
+    };
+    db = {
+      type = lib.mkOption {
+        type = lib.types.enum [
+          "sqlite"
+          "postgres"
+        ];
+        default = "sqlite";
+        description = ''
+          Type of the database to use.
+          Can be set to "sqlite" or "postgres".
+          If set to "postgres", the `passwordFile` option must be set.
+        '';
+      };
+      username = lib.mkOption {
+        type = lib.types.str;
+        default = "foregejo";
+        description = ''
+          The PostgreSQL user to use for the database.
+          Only used if db.type is set to "postgres".
+        '';
+      };
+      passwordFile = lib.mkOption {
+        type = lib.types.path;
+        description = ''
+          The file containing the PostgreSQL password for the database.
+          Only used if db.type is set to "postgres".
+        '';
+      };
     };
   };
 
@@ -105,71 +136,116 @@ in {
         security.INTERNAL_TOKEN = "{{ file.Read `${cfg.internalTokenFile}` }}";
         oauth2.JWT_SECRET = "{{ file.Read `${cfg.jwtSecretFile}` }}";
       }
+      (lib.mkIf (cfg.db.type == "sqlite") {
+        database = {
+          PATH = "/data/gitea/gitea.db";
+          DB_TYPE = "sqlite3";
+        };
+      })
+      (lib.mkIf (cfg.db.type == "postgres") {
+        database = {
+          DB_TYPE = "postgres";
+          HOST = "${dbName}:5432";
+          NAME = "forgejo";
+          USER = cfg.db.username;
+          PASSWD = "{{ file.Read `${cfg.db.passwordFile}` }}";
+        };
+      })
     ];
 
-    services.podman.containers.${name} = {
-      image = "codeberg.org/forgejo/forgejo:13";
-      volumes = [
-        "${storage}/data:/data"
-      ];
-
-      extraConfig.Container = {
-        Notify = "healthy";
-        HealthCmd = "curl -s -f http://localhost:3000 || exit 1";
-        HealthInterval = "10s";
-        HealthTimeout = "10s";
-        HealthRetries = 5;
-        HealthStartPeriod = "5s";
-      };
-      extraConfig.Service.ExecStartPost =
-        lib.mkIf (cfg.adminProvisioning.enable)
-        [
-          (
-            lib.getExe (
-              pkgs.writeShellScriptBin "forgejo-admin-user-create"
-              (
-                lib.concatStringsSep
-                " "
-                [
-                  "${lib.getExe config.nps.package} exec -u git"
-                  "forgejo forgejo -c /data/gitea/conf/app.ini admin user create"
-                  "--username ${cfg.adminProvisioning.username}"
-                  "--email ${cfg.adminProvisioning.email}"
-                  "--password $(cat ${cfg.adminProvisioning.passwordFile})"
-                  "|| exit 0"
-                ]
-              )
-            )
-          )
+    services.podman.containers = {
+      ${name} = {
+        image = "codeberg.org/forgejo/forgejo:13";
+        volumes = [
+          "${storage}/data:/data"
         ];
 
-      # Use template mount instead of "_URI" settings, as app.ini has to be writable anyways
-      templateMount = lib.optional (cfg.settings != null) {
-        templatePath = cfg.settings;
-        destPath = "/data/gitea/conf/app.ini";
-        chown = {
-          user = "1000";
-          group = "1000";
+        extraConfig.Container = {
+          Notify = "healthy";
+          HealthCmd = "curl -s -f http://localhost:3000 || exit 1";
+          HealthInterval = "10s";
+          HealthTimeout = "10s";
+          HealthRetries = 5;
+          HealthStartPeriod = "5s";
+        };
+        extraConfig.Service.ExecStartPost =
+          lib.mkIf (cfg.adminProvisioning.enable)
+          [
+            (
+              lib.getExe (
+                pkgs.writeShellScriptBin "forgejo-admin-user-create"
+                (
+                  lib.concatStringsSep
+                  " "
+                  [
+                    "${lib.getExe config.nps.package} exec -u git"
+                    "forgejo forgejo -c /data/gitea/conf/app.ini admin user create"
+                    "--username ${cfg.adminProvisioning.username}"
+                    "--email ${cfg.adminProvisioning.email}"
+                    "--password $(cat ${cfg.adminProvisioning.passwordFile})"
+                    "|| exit 0"
+                  ]
+                )
+              )
+            )
+          ];
+
+        # Use template mount instead of "_URI" settings, as app.ini has to be writable anyways
+        templateMount = lib.optional (cfg.settings != null) {
+          templatePath = cfg.settings;
+          destPath = "/data/gitea/conf/app.ini";
+          chown = {
+            user = "1000";
+            group = "1000";
+          };
+        };
+
+        ports = ["222:22"];
+
+        stack = name;
+        port = 3000;
+        traefik.name = name;
+        homepage = {
+          inherit category;
+          name = displayName;
+          settings = {
+            inherit description;
+            icon = "forgejo";
+          };
+        };
+        glance = {
+          inherit category description;
+          name = displayName;
+          id = name;
+          icon = "di:forgejo";
         };
       };
 
-      ports = ["222:22"];
-
-      port = 3000;
-      traefik.name = name;
-      homepage = {
-        inherit category;
-        name = displayName;
-        settings = {
-          inherit description;
-          icon = "forgejo";
+      ${dbName} = lib.mkIf (cfg.db.type == "postgres") {
+        image = "docker.io/postgres:18";
+        volumes = ["${storage}/postgres:/var/lib/postgresql"];
+        extraEnv = {
+          POSTGRES_DB = "forgejo";
+          POSTGRES_USER = cfg.db.username;
+          POSTGRES_PASSWORD.fromFile = cfg.db.passwordFile;
         };
-      };
-      glance = {
-        inherit category description;
-        name = displayName;
-        id = name;
-        icon = "di:forgejo";
+
+        extraConfig.Container = {
+          Notify = "healthy";
+          HealthCmd = "pg_isready -d forgejo -U ${cfg.db.username}";
+          HealthInterval = "10s";
+          HealthTimeout = "10s";
+          HealthRetries = 5;
+          HealthStartPeriod = "10s";
+        };
+
+        stack = name;
+        glance = {
+          parent = name;
+          name = "Postgres";
+          icon = "di:postgres";
+          inherit category;
+        };
       };
     };
   };
