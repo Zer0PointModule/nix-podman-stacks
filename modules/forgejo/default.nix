@@ -15,6 +15,116 @@
   category = "General";
   displayName = "Forgejo";
   description = "Git Server";
+
+  runUser = cfg.settings.DEFAULT.RUN_USER or "git";
+
+  adminProvisionScript = pkgs.writeShellApplication {
+    name = "forgejo-admin-user-create";
+    runtimeInputs = [config.nps.package pkgs.coreutils];
+    bashOptions = [
+      "errexit"
+      "nounset"
+      "pipefail"
+    ];
+    text = ''
+      ${lib.concatStringsSep
+        " "
+        [
+          "podman exec -u ${runUser}"
+          "forgejo forgejo -c /data/gitea/conf/app.ini admin user create"
+          "--username ${cfg.adminProvisioning.username}"
+          "--email ${cfg.adminProvisioning.email}"
+          "--password \"$(cat ${cfg.adminProvisioning.passwordFile})\""
+          "--admin"
+          "|| exit 0"
+        ]}
+    '';
+  };
+
+  oidcProviderName = "Authelia";
+  oidcArgs = lib.concatStringsSep " " [
+    ''--name "${oidcProviderName}"''
+    ''--provider "openidConnect"''
+    ''--key "${name}"''
+    ''--secret "$(cat ${cfg.oidc.clientSecretFile})"''
+    ''--auto-discover-url "${config.nps.containers.authelia.traefik.serviceUrl}/.well-known/openid-configuration" ''
+    ''${lib.concatMapStringsSep " " (scope: "--scopes ${scope}") ["openid" "email" "profile" "groups"]} ''
+    ''--group-claim-name "groups"''
+    ''--admin-group "${cfg.oidc.adminGroup}"''
+  ];
+
+  setupOidcScript = pkgs.writeShellApplication {
+    name = "forgejo-setup-oidc";
+    runtimeInputs = with pkgs; [
+      config.nps.package
+      gawk
+      gnugrep
+      coreutils
+    ];
+    bashOptions = [
+      "errexit"
+      "nounset"
+      "pipefail"
+    ];
+    text = ''
+      CONTAINER_NAME="${name}"
+      CONFIG_PATH="/data/gitea/conf/app.ini"
+      PROVIDER_NAME="${oidcProviderName}"
+
+      # Check if OIDC provider already exists
+      AUTH_LIST=$(podman exec -u ${runUser} "$CONTAINER_NAME" forgejo --config "$CONFIG_PATH" admin auth list)
+
+      # Extract ID if provider exists
+      PROVIDER_ID=$(echo "$AUTH_LIST" | grep -E "^\s*[0-9]+\s+$PROVIDER_NAME\s+" | awk '{print $1}' || true)
+
+      if [ -n "$PROVIDER_ID" ]; then
+        echo "Found existing OIDC provider with ID: $PROVIDER_ID"
+        echo "Updating OIDC configuration..."
+        podman exec -u ${runUser} "$CONTAINER_NAME" \
+          forgejo --config "$CONFIG_PATH" admin auth update-oauth --id "$PROVIDER_ID" ${oidcArgs}
+        echo "OIDC provider updated successfully (ID: $PROVIDER_ID)"
+      else
+        echo "OIDC provider not found. Creating new provider..."
+
+        podman exec -u ${runUser} "$CONTAINER_NAME" \
+          forgejo --config "$CONFIG_PATH" admin auth add-oauth ${oidcArgs}
+        echo "OIDC provider created successfully"
+      fi
+    '';
+  };
+
+  teardownOidcScript = pkgs.writeShellApplication {
+    name = "forgejo-teardown-oidc";
+    runtimeInputs = with pkgs; [
+      config.nps.package
+      gawk
+      gnugrep
+      coreutils
+    ];
+    bashOptions = [
+      "errexit"
+      "nounset"
+      "pipefail"
+    ];
+    text = ''
+      CONTAINER_NAME="${name}"
+      CONFIG_PATH="/data/gitea/conf/app.ini"
+      PROVIDER_NAME="${oidcProviderName}"
+
+      # Check if OIDC provider already exists
+      AUTH_LIST=$(podman exec -u ${runUser} "$CONTAINER_NAME" forgejo --config "$CONFIG_PATH" admin auth list)
+
+      # Extract ID if provider exists
+      PROVIDER_ID=$(echo "$AUTH_LIST" | grep -E "^\s*[0-9]+\s+$PROVIDER_NAME\s+" | awk '{print $1}' || true)
+
+      if [ -n "$PROVIDER_ID" ]; then
+        echo "Removing existing OIDC provider with ID: $PROVIDER_ID"
+        podman exec -u ${runUser} "$CONTAINER_NAME" \
+          forgejo --config "$CONFIG_PATH" admin auth delete --id "$PROVIDER_ID"
+        echo "OIDC provider deleted successfully (ID: $PROVIDER_ID)"
+      fi
+    '';
+  };
 in {
   imports = import ../mkAliases.nix config lib name [name];
 
@@ -125,9 +235,70 @@ in {
         '';
       };
     };
+    oidc = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = ''
+          Whether to enable OIDC login with Authelia. This will register an OIDC client in Authelia
+          and setup the necessary configuration.
+
+          For details, see:
+          - <https://github.com/fccview/jotty/blob/main/howto/SSO.md>
+        '';
+      };
+      clientSecretFile = (import ../authelia/options.nix lib).clientSecretFile;
+      clientSecretHash = (import ../authelia/options.nix lib).derivableClientSecretHash cfg.oidc.clientSecretFile;
+      adminGroup = lib.mkOption {
+        type = lib.types.str;
+        default = "${name}_admin";
+        description = ''
+          Users of this group will be admin
+        '';
+      };
+      userGroup = lib.mkOption {
+        type = lib.types.str;
+        default = "${name}_user";
+        description = ''
+          Users of this group will be able to log in
+        '';
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    nps.stacks.lldap.bootstrap.groups = lib.mkIf cfg.oidc.enable {
+      ${cfg.oidc.userGroup} = {};
+      ${cfg.oidc.adminGroup} = {};
+    };
+    nps.stacks.authelia = lib.mkIf cfg.oidc.enable {
+      oidc.clients.${name} = {
+        client_name = displayName;
+        client_secret = cfg.oidc.clientSecretHash;
+        public = false;
+        authorization_policy = name;
+        require_pkce = true;
+        pkce_challenge_method = "S256";
+        pre_configured_consent_duration = config.nps.stacks.authelia.oidc.defaultConsentDuration;
+        redirect_uris = [
+          "${cfg.containers.${name}.traefik.serviceUrl}/user/oauth2/${oidcProviderName}/callback"
+        ];
+      };
+
+      settings.identity_providers.oidc.authorization_policies.${name} = {
+        default_policy = "deny";
+        rules = [
+          {
+            policy = config.nps.stacks.authelia.defaultAllowPolicy;
+            subject = [
+              "group:${cfg.oidc.adminGroup}"
+              "group:${cfg.oidc.userGroup}"
+            ];
+          }
+        ];
+      };
+    };
+
     nps.stacks.${name}.settings = lib.mkMerge [
       (import ./settings.nix config)
       {
@@ -151,6 +322,17 @@ in {
           PASSWD = "{{ file.Read `${cfg.db.passwordFile}` }}";
         };
       })
+      (lib.mkIf cfg.oidc.enable {
+        openid = {
+          ENABLE_OPENID_SIGNIN = true;
+          ENABLE_OPENID_SIGNUP = true;
+          WHITELISTED_URIS = config.nps.containers.authelia.traefik.serviceHost;
+        };
+        service = {
+          DISABLE_REGISTRATION = lib.mkDefault false;
+          ALLOW_ONLY_EXTERNAL_REGISTRATION = lib.mkDefault true;
+        };
+      })
     ];
 
     services.podman.containers = {
@@ -170,27 +352,14 @@ in {
           HealthStartPeriod = "5s";
         };
         extraConfig.Service.ExecStartPost =
-          lib.mkIf (cfg.adminProvisioning.enable)
-          [
+          lib.optional cfg.adminProvisioning.enable (lib.getExe adminProvisionScript)
+          ++ [
             (
-              lib.getExe (
-                pkgs.writeShellScriptBin "forgejo-admin-user-create"
-                (
-                  lib.concatStringsSep
-                  " "
-                  [
-                    "${lib.getExe config.nps.package} exec -u git"
-                    "forgejo forgejo -c /data/gitea/conf/app.ini admin user create"
-                    "--username ${cfg.adminProvisioning.username}"
-                    "--email ${cfg.adminProvisioning.email}"
-                    "--password $(cat ${cfg.adminProvisioning.passwordFile})"
-                    "|| exit 0"
-                  ]
-                )
-              )
+              if cfg.oidc.enable
+              then (lib.getExe setupOidcScript)
+              else (lib.getExe teardownOidcScript)
             )
           ];
-
         # Use template mount instead of "_URI" settings, as app.ini has to be writable anyways
         templateMount = lib.optional (cfg.settings != null) {
           templatePath = cfg.settings;

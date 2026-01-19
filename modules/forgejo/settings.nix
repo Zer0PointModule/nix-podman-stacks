@@ -32,6 +32,7 @@ in {
     SSH_LISTEN_PORT = 22;
     LFS_START_SERVER = true;
     OFFLINE_MODE = true;
+    LANDING_PAGE = "login";
   };
 
   indexer = {
@@ -66,11 +67,9 @@ in {
   };
 
   service = {
-    DISABLE_REGISTRATION = true;
     REQUIRE_SIGNIN_VIEW = false;
     REGISTER_EMAIL_CONFIRM = false;
     ENABLE_NOTIFY_MAIL = false;
-    ALLOW_ONLY_EXTERNAL_REGISTRATION = false;
     ENABLE_CAPTCHA = false;
     DEFAULT_KEEP_EMAIL_PRIVATE = false;
     DEFAULT_ALLOW_CREATE_ORGANIZATION = true;
@@ -84,11 +83,6 @@ in {
 
   mailer = {
     ENABLED = false;
-  };
-
-  openid = {
-    ENABLE_OPENID_SIGNIN = true;
-    ENABLE_OPENID_SIGNUP = false;
   };
 
   "cron.update_checker" = {
