@@ -4,12 +4,14 @@
 
 ```nix
 {config, ...}: {
-  nps.stacks.forgejo.enable = true;
+  nps.stacks.forgejo = {
+    enable = true;
 
-  lfsJwtSecretFile = config.sops.secrets."forgejo/lfs_jwt_secret".path;
-  secretKeyFile = config.sops.secrets."forgejo/secret_key".path;
-  internalTokenFile = config.sops.secrets."forgejo/internal_token".path;
-  jwtSecretFile = config.sops.secrets."forgejo/jwt_secret".path;
+    lfsJwtSecretFile = config.sops.secrets."forgejo/lfs_jwt_secret".path;
+    secretKeyFile = config.sops.secrets."forgejo/secret_key".path;
+    internalTokenFile = config.sops.secrets."forgejo/internal_token".path;
+    jwtSecretFile = config.sops.secrets."forgejo/jwt_secret".path;
+  };
 }
 ```
 
@@ -17,17 +19,19 @@
 
 ```nix
 {config, ...}: {
-  nps.stacks.forgejo.enable = true;
+  nps.stacks.forgejo = {
+    enable = true;
 
-  lfsJwtSecretFile = config.sops.secrets."forgejo/lfs_jwt_secret".path;
-  secretKeyFile = config.sops.secrets."forgejo/secret_key".path;
-  internalTokenFile = config.sops.secrets."forgejo/internal_token".path;
-  jwtSecretFile = config.sops.secrets."forgejo/jwt_secret".path;
+    lfsJwtSecretFile = config.sops.secrets."forgejo/lfs_jwt_secret".path;
+    secretKeyFile = config.sops.secrets."forgejo/secret_key".path;
+    internalTokenFile = config.sops.secrets."forgejo/internal_token".path;
+    jwtSecretFile = config.sops.secrets."forgejo/jwt_secret".path;
 
-  adminProvisioning = {
-    username = "forgejo";
-    email = "admin@example.com";
-    passwordFile = config.sops.secrets."forgejo/admin_password".path;
+    adminProvisioning = {
+      username = "forgejo";
+      email = "admin@example.com";
+      passwordFile = config.sops.secrets."forgejo/admin_password".path;
+    };
   };
 }
 ```
@@ -36,17 +40,19 @@
 
 ```nix
 {config, ...}: {
-  nps.stacks.forgejo.enable = true;
-
-  lfsJwtSecretFile = config.sops.secrets."forgejo/lfs_jwt_secret".path;
-  secretKeyFile = config.sops.secrets."forgejo/secret_key".path;
-  internalTokenFile = config.sops.secrets."forgejo/internal_token".path;
-  jwtSecretFile = config.sops.secrets."forgejo/jwt_secret".path;
-
-  oidc = {
+  nps.stacks.forgejo = {
     enable = true;
-    clientSecretFile = config.sops.secrets."fogejo/authelia/client_secret".path;
-    clientSecretHash = "$pbkdf2-sha512$...";
+
+    lfsJwtSecretFile = config.sops.secrets."forgejo/lfs_jwt_secret".path;
+    secretKeyFile = config.sops.secrets."forgejo/secret_key".path;
+    internalTokenFile = config.sops.secrets."forgejo/internal_token".path;
+    jwtSecretFile = config.sops.secrets."forgejo/jwt_secret".path;
+
+    oidc = {
+      enable = true;
+      clientSecretFile = config.sops.secrets."fogejo/authelia/client_secret".path;
+      clientSecretHash = "$pbkdf2-sha512$...";
+    };
   };
 }
 ```
@@ -55,16 +61,18 @@
 
 ```nix
 {config, ...}: {
-  nps.stacks.forgejo.enable = true;
+  nps.stacks.forgejo = {
+    enable = true;
 
-  lfsJwtSecretFile = config.sops.secrets."forgejo/lfs_jwt_secret".path;
-  secretKeyFile = config.sops.secrets."forgejo/secret_key".path;
-  internalTokenFile = config.sops.secrets."forgejo/internal_token".path;
-  jwtSecretFile = config.sops.secrets."forgejo/jwt_secret".path;
+    lfsJwtSecretFile = config.sops.secrets."forgejo/lfs_jwt_secret".path;
+    secretKeyFile = config.sops.secrets."forgejo/secret_key".path;
+    internalTokenFile = config.sops.secrets."forgejo/internal_token".path;
+    jwtSecretFile = config.sops.secrets."forgejo/jwt_secret".path;
 
-  db = {
-    type = "postgres";
-    passwordFile = config.sops.secrets."forgejo/db_password".path;
+    db = {
+      type = "postgres";
+      passwordFile = config.sops.secrets."forgejo/db_password".path;
+    };
   };
 }
 ```
