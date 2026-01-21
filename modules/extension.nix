@@ -67,7 +67,7 @@ in {
               apply = map (d: "podman-${d}.service");
               description = ''
                 List of containers that this container depends on.
-                Similar to `dependsOn`, but will automatically apply correct pre- and suffix for
+                Similar to `wants`, but will automatically apply correct pre- and suffix for
                 the generated systemd services.
               '';
             };
