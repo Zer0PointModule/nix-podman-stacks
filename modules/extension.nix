@@ -180,6 +180,27 @@ in {
                       type = lib.types.path;
                       description = "Destination path of the templated file within the container";
                     };
+                    chown = lib.mkOption {
+                      type = lib.types.nullOr (
+                        lib.types.submodule {
+                          options = {
+                            user = lib.mkOption {
+                              type = lib.types.str;
+                              description = "User that should own the file";
+                            };
+                            group = lib.mkOption {
+                              type = lib.types.str;
+                              description = "Group that should own the file";
+                            };
+                          };
+                        }
+                      );
+                      default = null;
+                      description = ''
+                        Optional user and group that should own the templated file inside the container.
+                        This will run run `podman unshare chown <user:group> <destPath>` on the templated file.
+                      '';
+                    };
                   };
                 }
               );
@@ -303,8 +324,8 @@ in {
                   ++ lib.optional (extraCommandEnv != {}) envFromCommandLocation;
 
                 volumes =
-                  (config.fileEnvMount |> lib.attrValues |> lib.map (v: "${v.sourcePath}:${v.destPath}"))
-                  ++ (config.templateMount |> lib.map (m: "${mkTemplateMountSource m.destPath}:${m.destPath}"));
+                  lib.mkAfter ((config.fileEnvMount |> lib.attrValues |> lib.map (v: "${v.sourcePath}:${v.destPath}"))
+                    ++ (config.templateMount |> lib.map (m: "${mkTemplateMountSource m.destPath}:${m.destPath}")));
 
                 extraConfig = {
                   Unit = {
@@ -342,6 +363,7 @@ in {
                           runtimeInputs = [
                             pkgs.coreutils
                             pkgs.gomplate
+                            globalConf.nps.package
                           ];
                           bashOptions = [
                             "errexit"
@@ -438,10 +460,14 @@ in {
 
                               ${
                                 config.templateMount
-                                |> lib.map (m: ''
-                                  install -D -m 600 /dev/null ${mkTemplateMountSource m.destPath}
-                                  gomplate -f ${m.templatePath} > ${mkTemplateMountSource m.destPath}
-                                '')
+                                |> lib.map (
+                                  m: ''
+                                    install -D -m 600 /dev/null ${mkTemplateMountSource m.destPath}
+                                    gomplate -f ${m.templatePath} > ${mkTemplateMountSource m.destPath}
+                                    ${lib.optionalString (m.chown != null)
+                                      "podman unshare chown ${m.chown.user}:${m.chown.group} ${mkTemplateMountSource m.destPath}"}
+                                  ''
+                                )
                                 |> lib.concatStringsSep "\n"
                               }
                             '';

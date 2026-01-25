@@ -210,16 +210,24 @@ in {
       };
 
       flaresolverr.enable = true;
-
       forgejo = {
         enable = true;
-        settings = {
-          DEFAULT = {
-            RUN_MODE = "dev";
-          };
-          other = {
-            SHOW_FOOTER_VERSION = false;
-          };
+        lfsJwtSecretFile = dummySecretFile;
+        secretKeyFile = dummySecretFile;
+        internalTokenFile = dummySecretFile;
+        jwtSecretFile = dummySecretFile;
+        adminProvisioning = {
+          username = "forgejo";
+          email = "admin@test.com";
+          passwordFile = dummySecretFile;
+        };
+        oidc = {
+          enable = true;
+          clientSecretFile = dummySecretFile;
+        };
+        db = {
+          type = "postgres";
+          passwordFile = dummySecretFile;
         };
       };
 
