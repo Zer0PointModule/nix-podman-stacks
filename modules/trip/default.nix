@@ -43,7 +43,7 @@ in {
           and setup the necessary configuration.
 
           For details, see:
-          - <https://github.com/fccview/jotty/blob/main/howto/SSO.md>
+          - <https://itskovacs.github.io/trip/docs/getting-started/configuration/#oidc-auth>
         '';
       };
       clientSecretFile = (import ../authelia/options.nix lib).clientSecretFile;
