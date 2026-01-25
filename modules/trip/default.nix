@@ -3,14 +3,14 @@
   lib,
   ...
 }: let
-  name = "papra";
+  name = "trip";
 
   cfg = config.nps.stacks.${name};
   storage = "${config.nps.storageBaseDir}/${name}";
 
   category = "General";
-  description = "Document Management Platform";
-  displayName = "Papra";
+  description = "Trip Planner";
+  displayName = "Trip";
 in {
   imports = import ../mkAliases.nix config lib name [
     name
@@ -18,26 +18,18 @@ in {
 
   options.nps.stacks.${name} = {
     enable = lib.mkEnableOption name;
-    authSecretFile = lib.mkOption {
-      type = lib.types.path;
-      description = ''
-        Path to a file containing the auth secret for Papra.
-        You can generate a secret using `openssl rand -hex 48`.
-
-        See <https://docs.papra.app/self-hosting/configuration/#auth_secret>
-      '';
-    };
     extraEnv = lib.mkOption {
       type = (import ../types.nix lib).extraEnv;
       default = {};
       description = ''
         Extra environment variables to set for the container.
+        Can be used to pass secrets such as the `TMDB_ACCESS_TOKEN`.
 
-        See <https://docs.papra.app/self-hosting/configuration/#configuration-variables>
+        See <https://itskovacs.github.io/trip/docs/getting-started/configuration>
       '';
       example = {
         SOME_SECRET = {
-          fromFile = "/run/secrets/secret_name";
+          fromFile = "/run/secrets/tmdb_access_token";
         };
         FOO = "bar";
       };
@@ -51,12 +43,18 @@ in {
           and setup the necessary configuration.
 
           For details, see:
-          - <https://www.authelia.com/integration/openid-connect/clients/papra/>
-          - <https://docs.papra.app/guides/setup-custom-oauth2-providers/>
+          - <https://itskovacs.github.io/trip/docs/getting-started/configuration/#oidc-auth>
         '';
       };
       clientSecretFile = (import ../authelia/options.nix lib).clientSecretFile;
       clientSecretHash = (import ../authelia/options.nix lib).derivableClientSecretHash cfg.oidc.clientSecretFile;
+      adminGroup = lib.mkOption {
+        type = lib.types.str;
+        default = "${name}_admin";
+        description = ''
+          Users of this group will be admin
+        '';
+      };
       userGroup = lib.mkOption {
         type = lib.types.str;
         default = "${name}_user";
@@ -70,6 +68,7 @@ in {
   config = lib.mkIf cfg.enable {
     nps.stacks.lldap.bootstrap.groups = lib.mkIf cfg.oidc.enable {
       ${cfg.oidc.userGroup} = {};
+      ${cfg.oidc.adminGroup} = {};
     };
     nps.stacks.authelia = lib.mkIf cfg.oidc.enable {
       oidc.clients.${name} = {
@@ -77,22 +76,31 @@ in {
         client_secret = cfg.oidc.clientSecretHash;
         public = false;
         authorization_policy = name;
-        require_pkce = true;
-        pkce_challenge_method = "S256";
+        require_pkce = false;
+        pkce_challenge_method = "";
         pre_configured_consent_duration = config.nps.stacks.authelia.oidc.defaultConsentDuration;
         redirect_uris = [
-          "${cfg.containers.${name}.traefik.serviceUrl}/api/auth/oauth2/callback/authelia"
+          "${cfg.containers.${name}.traefik.serviceUrl}/auth"
         ];
-        token_endpoint_auth_method = "client_secret_post";
+        claims_policy = name;
       };
 
-      # No real RBAC control based on custom claims / groups yet. Restrict user-access on Authelia level for now
+      settings.identity_providers.oidc.claims_policies.${name}.id_token = [
+        "email"
+        "email_verified"
+        "preferred_username"
+        "name"
+      ];
+
       settings.identity_providers.oidc.authorization_policies.${name} = {
         default_policy = "deny";
         rules = [
           {
             policy = config.nps.stacks.authelia.defaultAllowPolicy;
-            subject = "group:${cfg.oidc.userGroup}";
+            subject = [
+              "group:${cfg.oidc.adminGroup}"
+              "group:${cfg.oidc.userGroup}"
+            ];
           }
         ];
       };
@@ -100,59 +108,37 @@ in {
 
     services.podman.containers = {
       ${name} = {
-        image = "ghcr.io/papra-hq/papra:26.1.0-rootless";
-        user = "${toString config.nps.defaultUid}:${toString config.nps.defaultGid}";
+        image = "ghcr.io/itskovacs/trip:1.36.0";
+        exec = "fastapi run /app/trip/main.py --host 0.0.0.0";
         volumes = [
-          "${storage}/data:/app/app-data"
-          "${storage}/ingestion:/app/ingestion"
+          "${storage}/storage:/app/storage"
         ];
 
         extraEnv =
           {
-            AUTH_SECRET.fromFile = cfg.authSecretFile;
-            APP_BASE_URL = cfg.containers.${name}.traefik.serviceUrl;
-            INGESTION_FOLDER_IS_ENABLED = true;
-          }
-          // lib.optionalAttrs (cfg.oidc.enable) {
-            AUTH_PROVIDERS_EMAIL_IS_ENABLED = lib.mkDefault false;
-            AUTH_IS_REGISTRATION_ENABLED = lib.mkDefault false;
-            AUTH_PROVIDERS_CUSTOMS.fromTemplate = let
-              autheliaUrl = config.nps.containers.authelia.traefik.serviceUrl;
-            in
-              [
-                {
-                  providerId = "authelia";
-                  providerName = "Authelia";
-                  providerIconUrl = "https://www.authelia.com/images/branding/logo-cropped.png";
-                  clientId = name;
-                  clientSecret = "{{ file.Read `${cfg.oidc.clientSecretFile}`}}";
-                  type = "oidc";
-                  pkce = true;
-                  discoveryUrl = "${autheliaUrl}/.well-known/openid-configuration";
-                  scopes = ["openid" "profile" "email"];
-                }
-              ]
-              |> builtins.toJSON
-              |> lib.replaceStrings ["\n"] [""];
+            OIDC_DISCOVERY_URL = "${config.nps.containers.authelia.traefik.serviceUrl}/.well-known/openid-configuration";
+            OIDC_CLIENT_ID = name;
+            OIDC_CLIENT_SECRET.fromFile = cfg.oidc.clientSecretFile;
+            OIDC_REDIRECT_URI = "${cfg.containers.${name}.traefik.serviceUrl}/auth";
           }
           // cfg.extraEnv;
 
         stack = name;
-        port = 1221;
+        port = 8000;
         traefik.name = name;
         homepage = {
           inherit category;
           name = displayName;
           settings = {
             inherit description;
-            icon = "papra";
+            icon = "sh-trip";
           };
         };
         glance = {
           inherit category description;
           name = displayName;
           id = name;
-          icon = "di:papra";
+          icon = "sh:trip";
         };
       };
     };
