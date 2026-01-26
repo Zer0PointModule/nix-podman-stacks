@@ -525,7 +525,9 @@ in {
             lib.optional (cfg.qui.adminPasswordFile != null)
             "${lib.getExe config.nps.package} exec ${quiName} /bin/sh -c 'qui create-user --username ${cfg.qui.adminUsername} < /run/secrets/admin_password'";
 
-          wantsContainer = (lib.optional cfg.qbittorrent.enable qbittorrentName) ++ lib.optional (cfg.qui.oidc.enable) "authelia";
+          wantsContainer =
+            (lib.optional cfg.qbittorrent.enable qbittorrentName)
+            ++ (lib.optional cfg.qui.oidc.enable "authelia");
 
           stack = stackName;
           port = 7476;
