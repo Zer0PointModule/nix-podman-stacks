@@ -46,6 +46,7 @@ let
     microbin = ./microbin;
     monitoring = ./monitoring;
     n8n = ./n8n;
+    navidrome = ./navidrome;
     networking-toolbox = ./networking-toolbox;
     norish = ./norish;
     ntfy = ./ntfy;

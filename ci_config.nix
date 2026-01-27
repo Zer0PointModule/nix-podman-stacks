@@ -516,6 +516,8 @@ in {
 
       n8n.enable = true;
 
+      navidrome.enable = true;
+
       networking-toolbox.enable = true;
 
       norish = {
