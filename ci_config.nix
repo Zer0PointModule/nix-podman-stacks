@@ -140,6 +140,18 @@ in {
         };
       };
 
+      ddns-updater = {
+        enable = true;
+        settings = [
+          {
+            provider = "duckdns";
+            domain = "example.duckdns.org";
+            token = "{{ file.Read `${dummySecretFile}`}}";
+            ip_version = "ipv4";
+          }
+        ];
+      };
+
       dockdns = {
         enable = true;
         extraEnv.EXAMPLE_COM_API_TOKEN.fromFile = dummySecretFile;

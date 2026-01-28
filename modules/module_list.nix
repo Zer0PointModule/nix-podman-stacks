@@ -15,6 +15,7 @@ let
     changedetection = ./changedetection;
     crowdsec = ./crowdsec;
     davis = ./davis;
+    ddns-updater = ./ddns-updater;
     dockdns = ./dockdns;
     donetick = ./donetick;
     dozzle = ./dozzle;
