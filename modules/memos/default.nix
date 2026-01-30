@@ -140,7 +140,7 @@ in {
 
       ${dbName} = lib.mkIf (cfg.db.type == "postgres") {
         image = "docker.io/postgres:17";
-        volumes = ["${storage}/postgres:/var/lib/postgresql/data"];
+        volumeMap.data = "${storage}/postgres:/var/lib/postgresql/data";
         extraEnv = {
           POSTGRES_DB = "memos";
           POSTGRES_USER = cfg.db.username;

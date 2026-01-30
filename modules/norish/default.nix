@@ -151,7 +151,7 @@ in {
 
       ${dbName} = {
         image = "docker.io/postgres:18";
-        volumes = ["${storage}/postgres:/var/lib/postgresql"];
+        volumeMap.data = "${storage}/postgres:/var/lib/postgresql";
 
         extraEnv = {
           POSTGRES_DB = "norish";

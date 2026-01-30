@@ -175,7 +175,7 @@ in {
         extraEnv = {
           MEILI_MASTER_KEY.fromFile = cfg.meiliMasterKeyFile;
         };
-        volumes = ["${storage}/meilisearch:/meili_data"];
+        volumeMap.data = "${storage}/meilisearch:/meili_data";
 
         stack = name;
         glance = {
