@@ -508,7 +508,7 @@ in {
         };
 
         ${quiName} = lib.mkIf cfg.qui.enable {
-          image = "ghcr.io/autobrr/qui:v1.12.0";
+          image = "ghcr.io/autobrr/qui:v1.13.1";
           volumeMap = {
             config = "${storage}/${quiName}:/config";
             media = "${mediaStorage}:/media";
@@ -649,7 +649,7 @@ in {
         };
 
         ${profilarrName} = lib.mkIf cfg.profilarr.enable {
-          image = "docker.io/santiagosayshey/profilarr:v1.1.3";
+          image = "docker.io/santiagosayshey/profilarr:v1.1.4";
           volumeMap.config = "${storage}/${profilarrName}/config:/config";
 
           environment = {

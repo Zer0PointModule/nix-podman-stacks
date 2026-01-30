@@ -346,6 +346,9 @@ in {
                 ];
 
                 extraConfig = {
+                  Container = {
+                    HealthOnFailure = lib.mkDefault "kill";
+                  };
                   Unit = {
                     Requires = config.dependsOn ++ config.dependsOnContainer;
                     Wants = config.wants ++ config.wantsContainer;

@@ -140,6 +140,18 @@ in {
         };
       };
 
+      ddns-updater = {
+        enable = true;
+        settings = [
+          {
+            provider = "duckdns";
+            domain = "example.duckdns.org";
+            token = "{{ file.Read `${dummySecretFile}`}}";
+            ip_version = "ipv4";
+          }
+        ];
+      };
+
       dockdns = {
         enable = true;
         extraEnv.EXAMPLE_COM_API_TOKEN.fromFile = dummySecretFile;
@@ -516,6 +528,8 @@ in {
 
       n8n.enable = true;
 
+      navidrome.enable = true;
+
       networking-toolbox.enable = true;
 
       norish = {
@@ -628,6 +642,17 @@ in {
           userPasswordFile = dummySecretFile;
           rootPasswordFile = dummySecretFile;
         };
+      };
+
+      searxng = {
+        enable = true;
+        secretKeyFile = dummySecretFile;
+        settings.engines = [
+          {
+            name = "dummy.online";
+            engine = "dummy";
+          }
+        ];
       };
 
       shelfmark = {

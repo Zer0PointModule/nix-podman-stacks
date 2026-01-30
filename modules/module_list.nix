@@ -15,6 +15,7 @@ let
     changedetection = ./changedetection;
     crowdsec = ./crowdsec;
     davis = ./davis;
+    ddns-updater = ./ddns-updater;
     dockdns = ./dockdns;
     donetick = ./donetick;
     dozzle = ./dozzle;
@@ -46,6 +47,7 @@ let
     microbin = ./microbin;
     monitoring = ./monitoring;
     n8n = ./n8n;
+    navidrome = ./navidrome;
     networking-toolbox = ./networking-toolbox;
     norish = ./norish;
     ntfy = ./ntfy;
@@ -56,6 +58,7 @@ let
     papra = ./papra;
     pocketid = ./pocket-id;
     romm = ./romm;
+    searxng = ./searxng;
     shelfmark = ./shelfmark;
     sshwifty = ./sshwifty;
     stirling-pdf = ./stirling-pdf;
