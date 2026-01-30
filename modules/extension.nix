@@ -346,8 +346,10 @@ in {
                 ];
 
                 extraConfig = {
-                  Container = {
-                    HealthOnFailure = lib.mkDefault "kill";
+                  Container = let
+                    hasHealthCheck = ((config.HealthCmd or "") != "") || ((config.HealthStartupCmd or "") != "");
+                  in {
+                    HealthOnFailure = lib.mkIf hasHealthCheck (lib.mkDefault "kill");
                   };
                   Unit = {
                     Requires = config.dependsOn ++ config.dependsOnContainer;
