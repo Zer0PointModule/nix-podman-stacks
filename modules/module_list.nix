@@ -56,7 +56,6 @@ let
     pangolin-newt = ./pangolin-newt;
     paperless = ./paperless;
     papra = ./papra;
-    pocketid = ./pocket-id;
     romm = ./romm;
     searxng = ./searxng;
     shelfmark = ./shelfmark;

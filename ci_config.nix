@@ -608,17 +608,6 @@ in {
         };
       };
 
-      pocketid = {
-        enable = true;
-        encryptionKeyFile = dummySecretFile;
-        traefikIntegration = {
-          enable = true;
-          clientId = dummyId;
-          clientSecretFile = dummySecretFile;
-          encryptionSecretFile = dummySecretFile;
-        };
-      };
-
       romm = {
         enable = true;
         adminProvisioning = {
