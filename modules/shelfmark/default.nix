@@ -35,7 +35,7 @@ in {
         Extra environment variables to set for the container.
         Variables can be either set directly or sourced from a file (e.g. for secrets).
 
-        See <https://github.com/calibrain/shelfmark?tab=readme-ov-file#environment-variables>
+        See <https://github.com/calibrain/shelfmark/blob/main/docs/environment-variables.md>
       '';
       example = {
         SOME_SECRET = {
@@ -63,23 +63,24 @@ in {
       ingestDir = "/books";
     in {
       image = "ghcr.io/calibrain/shelfmark-lite:v1.0.3";
-      environment = {
-        FLASK_PORT = port;
-        INGEST_DIR = ingestDir;
-        SEARCH_MODE = "direct";
-        PUID = config.nps.defaultUid;
-        PGID = config.nps.defaultGid;
-        ONBOARDING = false;
-      };
-      volumeMap = let
-        cloudflareBypassConfig = {
+      extraEnv =
+        {
+          FLASK_PORT = port;
+          INGEST_DIR = ingestDir;
+          SEARCH_MODE = "direct";
+          PUID = config.nps.defaultUid;
+          PGID = config.nps.defaultGid;
+          ONBOARDING = false;
+        }
+        // lib.optionalAttrs cfg.flaresolverr.enable {
+          USE_CF_BYPASS = true;
           USING_EXTERNAL_BYPASSER = true;
           EXT_BYPASSER_URL = "http://flaresolverr:8191";
-        };
-      in {
+        }
+        // cfg.extraEnv;
+      volumeMap = {
         config = "${storage}/config:/config";
         ingest = "${cfg.downloadDirectory}:${ingestDir}";
-        cfBypassSettings = lib.mkIf cfg.flaresolverr.enable "${pkgs.writers.writeJSON "cf_bypass.json" cloudflareBypassConfig}:/config/plugins/cloudflare_bypass.json";
       };
 
       port = port;
