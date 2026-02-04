@@ -1,3 +1,7 @@
+Lightweight LDAP authentication server
+
+- [Github](https://github.com/lldap/lldap)
+
 ## Example
 
 ```nix

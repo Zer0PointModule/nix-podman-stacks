@@ -1,3 +1,8 @@
+Monitoring for changes in websites
+
+- [Github](https://github.com/dgtlmoon/changedetection.io)
+- [Website](https://changedetection.io/)
+
 ## Example
 
 ```nix

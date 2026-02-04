@@ -1,3 +1,7 @@
+A free game claimer (Epic Games, GOG, etc.)
+
+- [Github](https://github.com/vogler/free-games-claimer)
+
 ## Example
 
 ```nix

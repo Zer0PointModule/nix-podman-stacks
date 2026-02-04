@@ -1,3 +1,8 @@
+Travel companion and adventure tracker
+
+- [Github](https://github.com/seanmorley15/AdventureLog)
+- [Website](https://adventurelog.app/)
+
 ## Example
 
 ```nix

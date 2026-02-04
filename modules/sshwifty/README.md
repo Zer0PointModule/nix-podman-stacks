@@ -1,3 +1,7 @@
+SSH and Telnet client made for the Web
+
+- [Github](https://github.com/nirui/sshwifty)
+
 ## Example
 
 ```nix

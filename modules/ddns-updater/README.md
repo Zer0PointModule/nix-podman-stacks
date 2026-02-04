@@ -1,3 +1,7 @@
+Dynamic DNS updater
+
+- [Github](https://github.com/qdm12/ddns-updater)
+
 ## Example
 
 ```nix

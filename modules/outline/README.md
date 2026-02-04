@@ -1,3 +1,8 @@
+Knowledge base
+
+- [Github](https://github.com/outline/outline)
+- [Website](https://www.getoutline.com/)
+
 ## Example
 
 ```nix
