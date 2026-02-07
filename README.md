@@ -171,3 +171,5 @@ There is also an [Option Search](https://tarow.github.io/nix-podman-stacks/searc
 Is your favorite self-hosted app not included yet? Or would you like to see additional options or integrations?
 I'm always looking to expand the collection!
 Feel free to [open an issue](https://github.com/Tarow/nix-podman-stacks/issues) or contribute directly with a [pull request](https://github.com/Tarow/nix-podman-stacks/pulls).
+
+When contributing a new service/stack, you can refer to the [example](https://github.com/Tarow/nix-podman-stacks/tree/main/modules/example) stack as a starting point.
