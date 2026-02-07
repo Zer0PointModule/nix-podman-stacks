@@ -88,7 +88,7 @@ in {
                     then ":${p}"
                     else ""
                   );
-                defaultText = lib.literalExpression ''"''${containerName}''${containerCfg.port}"'';
+                defaultText = lib.literalExpression ''"''${containerName}:''${containerCfg.port}"'';
                 description = ''
                   The internal main address of the service. Can be used for internal communication
                   without going through Traefik, when inside the same Podman network.
