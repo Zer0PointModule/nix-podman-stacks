@@ -623,6 +623,20 @@ in {
         };
       };
 
+      pinepods = {
+        enable = true;
+        db.passwordFile = dummySecretFile;
+        oidc = {
+          enable = true;
+          clientSecretFile = dummySecretFile;
+        };
+        adminProvisioning = {
+          enable = true;
+          email = "admin@example.com";
+          passwordFile = dummySecretFile;
+        };
+      };
+
       romm = {
         enable = true;
         adminProvisioning = {
