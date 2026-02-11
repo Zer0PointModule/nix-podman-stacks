@@ -1,6 +1,6 @@
 {
   lib,
-  config,
+  config ? {},
   ...
 }: {
   # With HM version 25.11 the construction of the Quadlet file changed.

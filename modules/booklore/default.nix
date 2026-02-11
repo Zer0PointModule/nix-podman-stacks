@@ -165,6 +165,7 @@ in {
           HealthTimeout = "10s";
           HealthRetries = 5;
           HealthStartPeriod = "20s";
+          HealthOnFailure = "kill";
         };
 
         stack = name;

@@ -151,6 +151,7 @@
         HealthTimeout = "10s";
         HealthRetries = 5;
         HealthStartPeriod = "10s";
+        HealthOnFailure = "kill";
       };
 
       stack = stackName;

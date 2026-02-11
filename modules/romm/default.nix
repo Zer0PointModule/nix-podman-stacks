@@ -255,6 +255,7 @@ in {
             HealthTimeout = "10s";
             HealthRetries = 5;
             HealthStartPeriod = "5s";
+            HealthOnFailure = "kill";
           };
           Service = {
             ExecStartPost = lib.optional cfg.adminProvisioning.enable (
@@ -305,6 +306,7 @@ in {
           HealthTimeout = "10s";
           HealthRetries = 5;
           HealthStartPeriod = "20s";
+          HealthOnFailure = "kill";
         };
 
         stack = name;

@@ -348,6 +348,7 @@ in {
           HealthTimeout = "10s";
           HealthRetries = 5;
           HealthStartPeriod = "5s";
+          HealthOnFailure = "kill";
         };
         extraConfig.Service.ExecStartPost =
           lib.optional cfg.adminProvisioning.enable (lib.getExe adminProvisionScript)
@@ -403,6 +404,7 @@ in {
           HealthTimeout = "10s";
           HealthRetries = 5;
           HealthStartPeriod = "10s";
+          HealthOnFailure = "kill";
         };
 
         stack = name;

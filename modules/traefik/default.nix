@@ -324,6 +324,7 @@ in {
         HealthTimeout = "10s";
         HealthRetries = 5;
         HealthStartPeriod = "10s";
+        HealthOnFailure = "kill";
       };
 
       # Traefik should only be in a single network and not be added to others by integations (e.g. socket-proxy)
