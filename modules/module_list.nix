@@ -58,6 +58,7 @@ let
     pangolin-newt = ./pangolin-newt;
     paperless = ./paperless;
     papra = ./papra;
+    readmeabook = ./readmeabook;
     romm = ./romm;
     searxng = ./searxng;
     shelfmark = ./shelfmark;
