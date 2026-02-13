@@ -113,6 +113,7 @@ in {
             cfg.containers.${name}.traefik.serviceUrl
             # the below are required for the android app to work
             "https://localhost"
+            "capacitor://localhost"
           ];
           serve_frontend = true;
         };
