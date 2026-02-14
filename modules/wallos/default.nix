@@ -96,7 +96,7 @@ in {
           inherit category description;
           name = displayName;
           id = name;
-          icon = "di:wallos";
+          icon = "di:wallos.webp";
         };
       };
     };

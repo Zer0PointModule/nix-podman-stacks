@@ -92,7 +92,7 @@ in {
         name = displayName;
         settings = {
           description = description;
-          icon = "calibre-web-automated-book-downloader";
+          icon = "shelfmark";
         };
       };
       glance = {
@@ -100,7 +100,7 @@ in {
         id = name;
         name = displayName;
         description = description;
-        icon = "di:calibre-web-automated-book-downloader";
+        icon = "di:shelfmark.webp";
       };
     };
   };
