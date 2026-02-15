@@ -111,7 +111,7 @@ in {
       ${name} = {
         image = "ghcr.io/booklore-app/booklore:v1.18.5";
         volumeMap = {
-          data = "${storage}/data:/data";
+          data = "${storage}/data:/app/data";
           books = "${storage}/books:/books";
           bookdrop = "${storage}/bookdrop:/bookdrop";
         };
