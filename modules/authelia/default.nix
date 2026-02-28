@@ -179,7 +179,7 @@ in {
     };
     settings = lib.mkOption {
       type = yaml.type;
-      apply = yaml.generate "configuration.yml";
+
       description = ''
         Additional Authelia settings. Will be provided in the `configuration.yml`.
       '';
@@ -292,10 +292,7 @@ in {
         password_reset.disable = lib.mkDefault true;
         password_change.disable = lib.mkDefault true;
       };
-      access_control.default_policy =
-        if ((cfg.settings.access_control.rules or []) != [])
-        then (lib.mkDefault "deny")
-        else (lib.mkDefault cfg.defaultAllowPolicy);
+
       notifier.filesystem.filename = "/notifier/notification.txt";
       session =
         {
@@ -363,7 +360,7 @@ in {
           {
             data = "${storage}/db:/data";
             notifier = "${storage}/notifier:/notifier";
-            settings = "${cfg.settings}:/config/configuration.yml";
+            settings = "${yaml.generate "configuration.yml" cfg.settings}:/config/configuration.yml";
           }
           // lib.optionalAttrs oidcEnabled {
             rsaKey = "${cfg.oidc.jwksRsaKeyFile}:/secrets/oidc/jwks/rsa.key";
