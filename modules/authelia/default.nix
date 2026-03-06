@@ -367,7 +367,7 @@ in {
             jwksKeyConfig = "${writeOidcJwksConfigFile "/secrets/oidc/jwks/rsa.key"}:/config/jwks_key_config.yml";
           };
 
-        wantsContainer = lib.optional (cfg.sessionProvider == "redis") redisName;
+        wantsContainer = ["lldap"] ++ lib.optional (cfg.sessionProvider == "redis") redisName;
         stack = name;
         port = 9091;
         traefik.name = name;
