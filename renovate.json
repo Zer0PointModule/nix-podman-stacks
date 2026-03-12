@@ -55,7 +55,7 @@
         "/redis/",
         "/valkey/",
         "/meilisearch/",
-        "docker.io/example/image:v1.2.3"
+        "docker.io/example/image"
       ],
       "enabled": false
     },
