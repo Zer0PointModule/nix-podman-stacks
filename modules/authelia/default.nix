@@ -326,8 +326,10 @@ in {
         address = "http://authelia:9091/api/authz/forward-auth?authelia_url=https%3A%2F%2F${
           cfg.containers.${name}.traefik.serviceHost
         }%2F";
-        trustForwardHeader = true;
+        trustForwardHeader = lib.mkDefault true;
         authResponseHeaders = "Remote-User,Remote-Groups,Remote-Email,Remote-Name";
+        maxBodySize = lib.mkDefault 10485760; # 10 MiB
+        maxResponseBodySize = lib.mkDefault 10485760; # 10 MiB
       };
     };
 
