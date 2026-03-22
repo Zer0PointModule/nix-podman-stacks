@@ -125,7 +125,6 @@ in {
           DATABASE_URL.fromTemplate = "jdbc:mariadb://${dbName}:3306/${db.MARIADB_DATABASE}";
           DATABASE_USERNAME = db.MARIADB_USER;
           DATABASE_PASSWORD = db.MARIADB_PASSWORD;
-          BOOKLORE_PORT = 6060;
         };
 
         dependsOnContainer = [dbName];
