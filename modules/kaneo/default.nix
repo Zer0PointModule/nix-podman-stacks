@@ -146,6 +146,7 @@ in {
             CUSTOM_OAUTH_CLIENT_SECRET.fromFile = cfg.oidc.clientSecretFile;
             CUSTOM_OAUTH_DISCOVERY_URL = "${config.nps.containers.authelia.traefik.serviceUrl}/.well-known/openid-configuration";
             CUSTOM_OAUTH_SCOPES = "openid,profile,email";
+            DISABLE_PASSWORD_REGISTRATION = lib.mkDefault true;
           };
 
         wantsContainer = [dbName];
