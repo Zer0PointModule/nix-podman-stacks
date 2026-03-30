@@ -69,6 +69,7 @@ let
     tandoor = ./tandoor;
     timetracker = ./timetracker;
     traefik = ./traefik;
+    trek = ./trek;
     trip = ./trip;
     uptime-kuma = ./uptime-kuma;
     vaultwarden = ./vaultwarden;
