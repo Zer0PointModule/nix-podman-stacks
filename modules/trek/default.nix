@@ -30,6 +30,11 @@ in {
       };
       clientSecretFile = (import ../authelia/options.nix lib).clientSecretFile;
       clientSecretHash = (import ../authelia/options.nix lib).derivableClientSecretHash cfg.oidc.clientSecretFile;
+      adminGroup = lib.mkOption {
+        type = lib.types.str;
+        default = "${name}_admin";
+        description = "Users of this group will be assigned admin rights";
+      };
       userGroup = lib.mkOption {
         type = lib.types.str;
         default = "${name}_user";
@@ -62,7 +67,10 @@ in {
         rules = [
           {
             policy = config.nps.stacks.authelia.defaultAllowPolicy;
-            subject = "group:${cfg.oidc.userGroup}";
+            subject = [
+              "group:${cfg.oidc.adminGroup}"
+              "group:${cfg.oidc.userGroup}"
+            ];
           }
         ];
       };
@@ -85,6 +93,8 @@ in {
           OIDC_CLIENT_SECRET.fromFile = cfg.oidc.clientSecretFile;
           OIDC_DISPLAY_NAME = "Authelia";
           OIDC_ONLY = lib.mkDefault true;
+          OIDC_ADMIN_CLAIM = "groups";
+          OIDC_ADMIN_VALUE = cfg.oidc.adminGroup;
         };
 
       port = 3000;
