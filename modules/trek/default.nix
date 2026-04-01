@@ -45,6 +45,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     nps.stacks.lldap.bootstrap.groups = lib.mkIf cfg.oidc.enable {
+      ${cfg.oidc.adminGroup} = {};
       ${cfg.oidc.userGroup} = {};
     };
     nps.stacks.authelia = lib.mkIf cfg.oidc.enable {
