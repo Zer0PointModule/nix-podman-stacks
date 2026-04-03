@@ -369,6 +369,16 @@ in {
             jwksKeyConfig = "${writeOidcJwksConfigFile "/secrets/oidc/jwks/rsa.key"}:/config/jwks_key_config.yml";
           };
 
+        extraConfig.Container = {
+          Notify = "healthy";
+          HealthCmd = "/app/healthcheck.sh";
+          HealthInterval = "10s";
+          HealthTimeout = "10s";
+          HealthRetries = 5;
+          HealthStartPeriod = "20s";
+          HealthOnFailure = "kill";
+        };
+
         wantsContainer = ["lldap"] ++ lib.optional (cfg.sessionProvider == "redis") redisName;
         stack = name;
         port = 9091;
