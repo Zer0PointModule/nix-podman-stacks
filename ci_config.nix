@@ -38,6 +38,15 @@ in {
         };
       };
 
+      anchor = {
+        enable = true;
+        oidc.enable = true;
+        db = {
+          type = "postgres";
+          passwordFile = dummySecretFile;
+        };
+      };
+
       aiostreams = {
         enable = true;
         secretKeyFile = dummySecretFile;
