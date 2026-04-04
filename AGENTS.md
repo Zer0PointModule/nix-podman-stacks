@@ -46,10 +46,7 @@ Every module (`modules/<name>/default.nix`) follows this pattern:
   storage = "${config.nps.storageBaseDir}/${name}";
   # category, description, displayName for Homepage/Glance
 in {
-  imports = [
-    ./extension.nix
-    (import ../mkAliases.nix config lib name [containers...])
-  ];
+  imports = import ../mkAliases.nix config lib name [name];
 
   options.nps.stacks.${name} = {
     enable = lib.mkEnableOption name;
