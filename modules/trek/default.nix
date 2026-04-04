@@ -87,6 +87,7 @@ in {
         {
           PORT = 3000;
           NODE_ENV = "production";
+          APP_URL = cfg.containers.${name}.traefik.serviceUrl;
         }
         // lib.optionalAttrs cfg.oidc.enable {
           OIDC_ISSUER = config.nps.containers.authelia.traefik.serviceUrl;
