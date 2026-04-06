@@ -136,6 +136,7 @@ in {
           PUID = config.nps.defaultUid;
           PGID = config.nps.defaultGid;
           ONBOARDING = false;
+          AUTH_METHOD = lib.mkDefault "none";
         }
         // lib.optionalAttrs cfg.oidc.enable {
           AUTH_METHOD = "oidc";
